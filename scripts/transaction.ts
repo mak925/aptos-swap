@@ -5,9 +5,11 @@ import * as SHA3 from "js-sha3";
 import fetch from "cross-fetch";
 import * as Nacl from "tweetnacl";
 import assert from "assert";
+import * as fs from 'fs';
 
 export const TESTNET_URL = "https://fullnode.devnet.aptoslabs.com";
 export const FAUCET_URL = "https://faucet.devnet.aptoslabs.com";
+export const account_address = "5307243468ebcd8ffce6c3374357fd0d156d00a9575b851e3142bc29baa03a56";
 
 //:!:>section_1
 /** A subset of the fields of a TransactionRequest, for this tutorial */
@@ -225,6 +227,8 @@ async function main() {
   const restClient = new RestClient(TESTNET_URL);
   const faucetClient = new FaucetClient(FAUCET_URL, restClient);
 
+  //where the deployed Coins module is located
+
   // Create two accounts, Alice and Bob, and fund Alice but not Bob
   const alice = new Account();
   const bob = new Account();
@@ -235,7 +239,7 @@ async function main() {
   );
   console.log(`Bob: ${bob.address()}. Key Seed: ${Buffer.from(bob.signingKey.secretKey).toString("hex").slice(0, 64)}`);
 
-  await faucetClient.fundAccount(alice.address(), 1_000_000_000);
+  await faucetClient.fundAccount(alice.address(), 500_000_000);
   await faucetClient.fundAccount(bob.address(), 0);
     
   console.log("\n=== Initial Balances ===");
@@ -247,6 +251,46 @@ async function main() {
   await restClient.waitForTransaction(txHash);
 
   console.log("\n=== Final Balances ===");
+  console.log(`Alice: ${await restClient.accountBalance(alice.address())}`);
+  console.log(`Bob: ${await restClient.accountBalance(bob.address())}`);
+
+  console.log("\n=== Register Coins ===");
+  //initializes BTC and USDT coins, uses Alice's address as token_admin
+  let register_coin_payload = {
+      "type": "script_function_payload",
+      "function": `${account_address}::Coins::register_coins`,
+      "type_arguments": [],
+      "arguments":[]
+  }
+  let res;
+  res = await restClient.executeTransactionWithPayload(alice, register_coin_payload);
+  console.log("res: ", res)
+  //@ts-ignore
+  await restClient.waitForTransaction(res)
+
+  // console.log("====== mint coins =======")
+  // let mint_coin_payload: { function: string; arguments: string[]; type: string; type_arguments: any[] } = {
+  //   "type": "script_function_payload",
+  //   "function": `${account_address}::Coins::mint_coin`,
+  //   "type_arguments": [`${account_address}::Coins::BTC`],
+  //   "arguments": [ 
+  //     bob.address(),
+  //     "100000000"
+  //   ]
+  // }
+  // res = await restClient.executeTransactionWithPayload(alice, mint_coin_payload);
+  // console.log("res: ", res)
+  // //@ts-ignore
+  // await restClient.waitForTransaction(res)
+
+  //get all resources at alice's address
+  //res = await restClient.accountResource(alice.address(), "0x1::Coin::CoinStore<0x1::TestCoin::TestCoin>")
+  //res = await restClient.accountResource(alice.address(), `0x1::Coin::CoinInfo<${account_address}::Coins::BTC>`)
+  // res = await restClient.accountResource(alice.address(), `$0x1::Coins::Caps<${account_address}::Coins::BTC>`)
+  // await restClient.waitForTransaction(res)
+  // console.log("resources owned by alice: ", res)
+
+  console.log("\n===  Balances Again ===");
   console.log(`Alice: ${await restClient.accountBalance(alice.address())}`);
   console.log(`Bob: ${await restClient.accountBalance(bob.address())}`);
 }

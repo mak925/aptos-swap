@@ -5,17 +5,17 @@ module Sender::Coins {
     use AptosFramework::Coin::{Self, MintCapability, BurnCapability};
 
     /// Represents test USDT coin.
-    struct USDT {}
+    struct USDT has key {}
 
     /// Represents test BTC coin.
-    struct BTC {}
+    struct BTC has key {}
 
     /// Storing mint/burn capabilities for `USDT` and `BTC` coins under user account.
     struct Caps<phantom CoinType> has key {
         mint: MintCapability<CoinType>,
         burn: BurnCapability<CoinType>,
     }
-
+    
     /// Initializes `BTC` and `USDT` coins.
     public(script) fun register_coins(token_admin: signer) {
         let (btc_m, btc_b) =
@@ -31,6 +31,10 @@ module Sender::Coins {
     /// Mints new coin `CoinType` on account `acc_addr`.
     public(script) fun mint_coin<CoinType>(token_admin: &signer, acc_addr: address, amount: u64) acquires Caps {
         let token_admin_addr = Signer::address_of(token_admin);
+        assert!(
+            exists<Caps<CoinType>>(token_admin_addr),
+            9999
+        );
         let caps = borrow_global<Caps<CoinType>>(token_admin_addr);
         let coins = Coin::mint<CoinType>(amount, &caps.mint);
         Coin::deposit(acc_addr, coins);
