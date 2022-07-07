@@ -41,7 +41,7 @@ module Sender::Coins {
         Coin::deposit(acc_addr, coins);
     }
     #[test(token_admin=@0xb2279c426e0d4bb29524ef1d420a370f16c958eb87bbe345dd056ad470e44a92)]
-    public(script) fun test_mint_coin(token_admin:signer) {//acquires Caps {//acquires Caps{
+    public(script) fun test_mint_coin(token_admin:signer) acquires Caps {//acquires Caps{
         use AptosFramework::TypeInfo;
         use AptosFramework::Coin;
         //use AptosFramework::ASCII::{String};
@@ -65,6 +65,10 @@ module Sender::Coins {
         assert!(TypeInfo::struct_name(&coin_info)==b"USDT", 1);
         assert!(TypeInfo::account_address(&coin_info) == @0xb2279c426e0d4bb29524ef1d420a370f16c958eb87bbe345dd056ad470e44a92, 1);
         
+        // 
+        // NOTE: this function used to take in token_admin and not &token_admin. In the former case, 
+        // we're not able to use &token_admin anymore after this...but we want to use it to test 
+        //
         register_coins(&token_admin); //init coins and move caps to token_admin
         
         let addr = Signer::address_of(&token_admin);
@@ -73,10 +77,16 @@ module Sender::Coins {
 
         assert!(
             Coin::is_account_registered<BTC>(addr)==true, 100
-        )
+        );
 
-        //mint coins to someone
-        //mint_coin<BTC>(&token_admin, addr, 100);
+        //mint coins to someone (in this case token admin)
+        mint_coin<BTC>(&token_admin, addr, 100);
+
+        assert!(
+            Coin::balance<BTC>(addr)==100,
+            2
+        );
+
         //get coins balance of account 2
         // assert!(
         //     is_coin_initialized<BTC>()==true,
