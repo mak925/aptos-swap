@@ -45,6 +45,7 @@ module HelloBlockchain::Message {
     #[test(account=@0x42)]
     public(script) fun sender_can_set_message(account: signer) acquires MessageHolder {
         let addr = Signer::address_of(&account);
+        //print(addr);
         set_message(account,  b"Hello, Blockchain");
 
         assert!(
