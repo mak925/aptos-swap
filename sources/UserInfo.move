@@ -11,7 +11,7 @@ module Sender::UserInfo {
     public(script) fun set_username(user_account: &signer, username_raw: vector<u8>) acquires UserProfile {
         // wrap username_raw (vector of bytes) to username string
         let username = string(username_raw);
-
+        
         // get address of transaction sender
         let user_addr = Signer::address_of(user_account);
         // `exists` just to check whether resource is present in storage

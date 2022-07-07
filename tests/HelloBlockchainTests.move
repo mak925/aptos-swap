@@ -18,3 +18,12 @@ module Sender::UserInfoTests {
         assert!(UserInfo::get_username(user_addr) == ASCII::string(username), 1);
     }
 }
+
+
+
+
+
+
+
+
+
