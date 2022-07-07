@@ -7,4 +7,4 @@ AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir 
 
 [addresses]
 Sender = "5307243468ebcd8ffce6c3374357fd0d156d00a9575b851e3142bc29baa03a56"
-
+HelloBlockchain = "5307243468ebcd8ffce6c3374357fd0d156d00a9575b851e3142bc29baa03a56"

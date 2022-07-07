@@ -241,7 +241,7 @@ async function main() {
 
   await faucetClient.fundAccount(alice.address(), 500_000_000);
   await faucetClient.fundAccount(bob.address(), 0);
-    
+
   console.log("\n=== Initial Balances ===");
   console.log(`Alice: ${await restClient.accountBalance(alice.address())}`);
   console.log(`Bob: ${await restClient.accountBalance(bob.address())}`);
@@ -293,6 +293,17 @@ async function main() {
   console.log("\n===  Balances Again ===");
   console.log(`Alice: ${await restClient.accountBalance(alice.address())}`);
   console.log(`Bob: ${await restClient.accountBalance(bob.address())}`);
+
+
+
+let get_msg_payload = {
+    "type": "script_function_payload",
+    "function": `${account_address}::Message::get_message`,
+    "type_arguments": [],
+    "arguments":["5307243468ebcd8ffce6c3374357fd0d156d00a9575b851e3142bc29baa03a56"]
+}
+res = await restClient.executeTransactionWithPayload(alice, get_msg_payload);
+console.log("get_message: ", res)
 }
 
 if (require.main === module) {

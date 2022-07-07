@@ -6,3 +6,4 @@ profiles:
     account: 5307243468ebcd8ffce6c3374357fd0d156d00a9575b851e3142bc29baa03a56
     rest_url: "https://fullnode.devnet.aptoslabs.com/"
     faucet_url: "https://faucet.devnet.aptoslabs.com/"
+
