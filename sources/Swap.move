@@ -1,7 +1,5 @@
-//
-// We write a swap module that lets you swap any coin X for an equivalent amount of any other coin Y
-// We assume that Coins has already been deployed to devnet using Sender, defined in Move.toml
-//
+// Swap lets you swap any coin X for an equivalent amount of any other coin Y
+// We assume that Coins has already been deployed to devnet using Sender
 module Sender::Swap{
     use AptosFramework::Coin;
     
