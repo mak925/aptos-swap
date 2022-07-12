@@ -1,3 +1,6 @@
+//
+// this code is extends https://github.com/pontem-network/liquidswap-lp/blob/main/sources/Coins.move
+//
 module Sender::Coins {
     use Std::Signer;
     use Std::ASCII::string;
@@ -19,7 +22,7 @@ module Sender::Coins {
 
     /// Initializes `BTC` and `USDT` coins.
     public(script) fun register_coins(token_admin: &signer) {
-        let (btc_m, btc_b) =
+        let (btc_m, btc_b) = 
             Coin::initialize<BTC>(token_admin,
                 string(b"Bitcoin"), string(b"BTC"), 8, true);
         let (usdt_m, usdt_b) =
@@ -40,8 +43,13 @@ module Sender::Coins {
         let coins = Coin::mint<CoinType>(amount, &caps.mint);
         Coin::deposit(acc_addr, coins);
     }
-    #[test(token_admin=@0xb2279c426e0d4bb29524ef1d420a370f16c958eb87bbe345dd056ad470e44a92)]
-    public(script) fun test_mint_coin(token_admin:signer) acquires Caps {//acquires Caps{
+
+    // public fun swap<CoinType1, CoinType2>(token_admin_addr, user: &signer, ) acquires Caps{
+    //     let caps = borrow_global<Caps<CoinType>>(token_admin_addr);
+    // }
+  
+    #[test(token_admin=@Sender, other=@0x782)]
+    public(script) fun test_mint_coin(token_admin:signer, other:signer) acquires Caps {//acquires Caps{
         use AptosFramework::TypeInfo;
         use AptosFramework::Coin;
         //use AptosFramework::ASCII::{String};
@@ -58,22 +66,24 @@ module Sender::Coins {
         let coin_info = TypeInfo::type_of<BTC>();
         assert!(TypeInfo::module_name(&coin_info)==b"Coins", 1);
         assert!(TypeInfo::struct_name(&coin_info)==b"BTC", 1);
-        assert!(TypeInfo::account_address(&coin_info) == @0xb2279c426e0d4bb29524ef1d420a370f16c958eb87bbe345dd056ad470e44a92, 1);
+        assert!(TypeInfo::account_address(&coin_info) == @Sender, 1);
 
         let coin_info = TypeInfo::type_of<USDT>();
         assert!(TypeInfo::module_name(&coin_info)==b"Coins", 1);
         assert!(TypeInfo::struct_name(&coin_info)==b"USDT", 1);
-        assert!(TypeInfo::account_address(&coin_info) == @0xb2279c426e0d4bb29524ef1d420a370f16c958eb87bbe345dd056ad470e44a92, 1);
+        assert!(TypeInfo::account_address(&coin_info) == @Sender, 1);
         
         // 
         // NOTE: this function used to take in token_admin and not &token_admin. In the former case, 
         // we're not able to use &token_admin anymore after this...but we want to use it to test 
         //
         register_coins(&token_admin); //init coins and move caps to token_admin
-        
+
         let addr = Signer::address_of(&token_admin);
+        let other_addr = Signer::address_of(&other);
 
         Coin::register<BTC>(&token_admin);
+        Coin::register<BTC>(&other);
 
         assert!(
             Coin::is_account_registered<BTC>(addr)==true, 100
@@ -87,19 +97,7 @@ module Sender::Coins {
             2
         );
 
-        //get coins balance of account 2
-        // assert!(
-        //     is_coin_initialized<BTC>()==true,
-        //     1
-        // )
-        // assert!(
-        //   balance<BTC>(addr2)>10,
-        //   1
-        // );
-
-        //assert!(
-        //  get_message(addr) == ASCII::string(b"Hello, Blockchain"),
-        //  ENO_MESSAGE
-        //);
+        assert!(Coin::balance<BTC>(other_addr)<100,
+            2)
     }
 }
